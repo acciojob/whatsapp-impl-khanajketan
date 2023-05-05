@@ -46,8 +46,7 @@ public class WhatsappService {
     public int createMessage(String content){
         int cnt = whatsappRepository.getMessageId();
         cnt++;
-        Date date = new Date();
-        Message message = new Message(cnt, content, date);
+        Message message = new Message(cnt, content);
         whatsappRepository.setMessageId(cnt);
         return cnt;
     }
