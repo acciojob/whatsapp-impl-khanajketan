@@ -8,7 +8,7 @@ public class WhatsappService {
     WhatsappRepository whatsappRepository = new WhatsappRepository();
     public String createUser(String name, String mobile){
         if(whatsappRepository.getUserAndMobile().containsKey(mobile)){
-            throw new RuntimeException("User already exists");
+            return "User already exists";
         }
         User u = new User(name, mobile);
         whatsappRepository.getUserMobile().add(mobile);
@@ -24,6 +24,7 @@ public class WhatsappService {
     //For example: Consider userList1 = {Alex, Bob, Charlie}, userList2 = {Dan, Evan}, userList3 = {Felix, Graham, Hugh}.
     //If createGroup is called for these userLists in the same order, their group names would be "Group 1", "Evan", and "Group 2" respectively.
     public Group createGroup(List<User> users){
+        if(users.size()< 2) return null;
         if(users.size() == 2){
             Group group = new Group(users.get(0).getName(), users.size());
             whatsappRepository.getGroupUserMap().put(group, users);
@@ -59,13 +60,13 @@ public class WhatsappService {
     }
     public String changeAdmin(User approver, User user, Group group){
         if(!isGroupExist(group)){
-            throw new RuntimeException("Group does not exist");
+            return "Group does not exist";
         }
         if(whatsappRepository.getAdminMap().get(group) != approver){
-            throw new RuntimeException("Approver does not have rights");
+            return "Approver does not have rights";
         }
         if(!findUserInGroup(user,group)){
-            throw new RuntimeException("User is not a participant");
+            return "User is not a participant";
         }
         whatsappRepository.getAdminMap().put(group, user);
         return "SUCCESS";
@@ -76,9 +77,9 @@ public class WhatsappService {
     }
     public int sendMessage(Message message, User sender, Group group){
         if(!isGroupExist(group)){
-            throw new RuntimeException("Group does not exist");
+            return -1;
         }else if(!findUserInGroup(sender,group)){
-            throw new RuntimeException("You are not allowed to send message");
+            return -2;
 
         }
         whatsappRepository.getGroupMessageMap().get(group).add(message);
