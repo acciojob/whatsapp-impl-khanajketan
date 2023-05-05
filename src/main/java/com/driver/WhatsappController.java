@@ -46,6 +46,7 @@ public class WhatsappController {
 
     @PostMapping("/add-message")
     public int createMessage(String content){
+        whatsappService.
         // The 'i^th' created message has message id 'i'.
         // Return the message id.
 
