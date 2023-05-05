@@ -26,7 +26,7 @@ public class WhatsappService {
     public Group createGroup(List<User> users){
         if(users.size()< 2) return null;
         if(users.size() == 2){
-            Group group = new Group(users.get(0).getName(), users.size());
+            Group group = new Group(users.get(1).getName(), users.size());
             whatsappRepository.getGroupUserMap().put(group, users);
             whatsappRepository.getGroupMessageMap().put(group, new ArrayList<Message>());
             whatsappRepository.getAdminMap().put(group, users.get(0));
