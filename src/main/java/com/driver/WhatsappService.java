@@ -1,15 +1,18 @@
 package com.driver;
 
+import org.springframework.stereotype.Service;
+import java.util.*;
+
 @Service
 public class WhatsappService {
     WhatsappRepository whatsappRepository = new WhatsappRepository();
     public String createUser(String name, String mobile){
-        if(whatsappRepository.userAndMobile.containsKey(mobile)){
-            throw new Exception("User already exists");
+        if(whatsappRepository.getUserAndMobile().containsKey(mobile)){
+            throw new RuntimeException("User already exists");
         }
         User u = new User(name, mobile);
-        whatsappRepository.userMobile.add(mobile);
-        whatsappRepository.userAndMobile.put(mobile, u);
+        whatsappRepository.getUserMobile().add(mobile);
+        whatsappRepository.getUserAndMobile().put(mobile, u);
         return "SUCCESS";
     }
     // The list contains at least 2 users where the first user is the admin. A group has exactly one admin.
@@ -22,26 +25,33 @@ public class WhatsappService {
     //If createGroup is called for these userLists in the same order, their group names would be "Group 1", "Evan", and "Group 2" respectively.
     public Group createGroup(List<User> users){
         if(users.size() == 2){
-            Group group = new Group(users.get(0), users.size());
-            whatsappRepository.groupUserMap(group, users);
-            whatsappRepository.groupMessageMap(group, new ArrayList<Message>);
-            whatsappRepository.adminMap(group, users.get(0));
-            int cnt = whatsappRepository.customGroupCount;
-            cnt++;
-            whatsappRepository.customGroupCount = cnt;
+            Group group = new Group(users.get(0).getName(), users.size());
+            whatsappRepository.getGroupUserMap().put(group, users);
+            whatsappRepository.getGroupMessageMap().put(group, new ArrayList<Message>());
+            whatsappRepository.getAdminMap().put(group, users.get(0));
             return group;
         }
+        int groupName = whatsappRepository.getCustomGroupCount();
+        groupName++;
+        Group group = new Group("Group"+groupName, users.size());
+        whatsappRepository.getGroupUserMap().put(group, users);
+        whatsappRepository.getGroupMessageMap().put(group, new ArrayList<Message>());
+        whatsappRepository.getAdminMap().put(group, users.get(0));
+        whatsappRepository.setCustomGroupCount(groupName);
+        return group;
+
     }
     //Creating message
     public int createMessage(String content){
-        int cnt = whatsappRepository.messageId;
+        int cnt = whatsappRepository.getMessageId();
         cnt++;
-        Message message = new Message(cnt, content, System.currentTimeMillis());
-        whatsappRepository.messageId = cnt;
+        Date date = new Date();
+        Message message = new Message(cnt, content, date);
+        whatsappRepository.setMessageId(cnt);
         return cnt;
     }
     public boolean findUserInGroup(User sender, Group group){
-        List<User> list = whatsappRepository.groupUserMap.get(group);
+        List<User> list = whatsappRepository.getGroupUserMap().get(group);
         for(int i=0; i<list.size(); i++){
             if(list.get(i) == sender) return true;
         }
@@ -51,16 +61,17 @@ public class WhatsappService {
         if(!isGroupExist(group)){
             throw new RuntimeException("Group does not exist");
         }
-        if(whatsappRepository.adminMap.get(group) != approver){
+        if(whatsappRepository.getAdminMap().get(group) != approver){
             throw new RuntimeException("Approver does not have rights");
         }
-        if(!findUserInGroup(sender,group){
+        if(!findUserInGroup(user,group)){
             throw new RuntimeException("User is not a participant");
         }
-        whatsappRepository.adminMap.put(group, user);
+        whatsappRepository.getAdminMap().put(group, user);
+        return "SUCCESS";
     }
     public boolean isGroupExist(Group group){
-        if(whatsappRepository.groupUserMap.containsKey(group)) return true;
+        if(whatsappRepository.getGroupUserMap().containsKey(group)) return true;
         return false;
     }
     public int sendMessage(Message message, User sender, Group group){
@@ -70,8 +81,8 @@ public class WhatsappService {
             throw new RuntimeException("You are not allowed to send message");
 
         }
-        whatsappRepository.groupMessageMap.get(group).add(message);
-        whatsappRepository.senderMap.put(message, sender);
-        return  whatsappRepository.groupMessageMap.get(group).size();
+        whatsappRepository.getGroupMessageMap().get(group).add(message);
+        whatsappRepository.getSenderMap().put(message, sender);
+        return  whatsappRepository.getGroupMessageMap().get(group).size();
     }
 }
