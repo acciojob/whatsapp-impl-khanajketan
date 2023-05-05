@@ -34,7 +34,7 @@ public class WhatsappService {
         }
         int groupName = whatsappRepository.getCustomGroupCount();
         groupName++;
-        Group group = new Group("Group    "+Integer.toString(groupName), users.size());
+        Group group = new Group("Group "+Integer.toString(groupName), users.size());
         whatsappRepository.getGroupUserMap().put(group, users);
         whatsappRepository.getGroupMessageMap().put(group, new ArrayList<Message>());
         whatsappRepository.getAdminMap().put(group, users.get(0));
